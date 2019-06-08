@@ -1,4 +1,4 @@
-package architect
+package location
 
 import (
 	"fmt"
@@ -28,13 +28,13 @@ func ToLocation(root string) (location Location, err error) {
 	return Location(root), nil
 }
 
-func (m Location) Child(location string) Location {
+func (m Location) Child(relative string) Location {
 
 	var (
 		names = []string{string(m)}
 	)
 
-	names = append(names, strings.Split(location, "/")...)
+	names = append(names, strings.Split(relative, "/")...)
 
 	return Location(Join(names...))
 }
@@ -61,6 +61,15 @@ func (m Location) GetInfo() (os.FileInfo, bool, error) {
 func (m Location) IsExists() (exists bool, err error) {
 	_, exists, err = m.GetInfo()
 	return
+}
+
+func (m Location) Contains(relative string) (bool, error) {
+
+	var (
+		location = m.Child(relative)
+	)
+
+	return location.IsExists()
 }
 
 func (m Location) IsDirectory() (bool, error) {
@@ -125,4 +134,13 @@ func (m Location) SaveYAML(v interface{}) error {
 	}
 
 	return nil
+}
+
+func (m Location) CreateDirectory(relative string) error {
+
+	var (
+		location = m.Child(relative)
+	)
+
+	return os.MkdirAll(string(location), 0755)
 }

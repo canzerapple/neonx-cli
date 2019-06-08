@@ -1,4 +1,4 @@
-module neonx-cli
+module github.com/canzerapple/neonx-cli
 
 go 1.12
 

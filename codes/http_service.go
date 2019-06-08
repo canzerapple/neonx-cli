@@ -1,6 +1,4 @@
-package architect
-
+package codes
 
 type HttpService struct {
-	
 }
