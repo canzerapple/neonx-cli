@@ -1,8 +1,9 @@
-package command
+package exec
 
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -34,16 +35,20 @@ func (m Environ) String() string {
 		index := strings.Index(value, "=")
 
 		if index > 0 {
-			fmt.Fprintf(b, "%s:\n", value[0:index])
+			_, _ = fmt.Fprintf(b, "%s:\n", value[0:index])
 
 			for _, item := range strings.Split(value[index+1:], EnvironSeparator) {
-				fmt.Fprintf(b, "    %s\n", item)
+				_, _ = fmt.Fprintf(b, "    %s\n", item)
 			}
 
 		} else {
-			fmt.Fprintln(b, value)
+			_, _ = fmt.Fprintln(b, value)
 		}
 	}
 
 	return b.String()
+}
+
+func GetEnviron() Environ {
+	return Environ(os.Environ())
 }
