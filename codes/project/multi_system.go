@@ -1,7 +1,9 @@
-package codes
+package project
 
 import (
 	"fmt"
+
+	"github.com/canzerapple/neonx-cli/codes"
 
 	"github.com/canzerapple/neonx-cli/location"
 	. "github.com/canzerapple/neonx-cli/location/creator"
@@ -30,7 +32,11 @@ const (
 )
 
 type MSProject struct {
-	project
+	base
+}
+
+func (m *MSProject) ClassName() string {
+	return "MSProject"
 }
 
 func CreateMSProject(root location.Location, name, describe string) (*MSProject, error) {
@@ -41,9 +47,9 @@ func CreateMSProject(root location.Location, name, describe string) (*MSProject,
 			Child: Nodes{
 				Dir(MSProjectProtocol),
 				Dir(MSProjectMiddleware),
-				&ProjectInfo{
-					Type:      TypeProject,
-					Architect: ProjectMultiSystem,
+				&codes.ProjectInfo{
+					Type:      codes.TypeProject,
+					Architect: codes.ProjectMultiSystem,
 					Name:      name,
 					Describe:  describe,
 				},

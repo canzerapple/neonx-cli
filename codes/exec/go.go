@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"runtime"
 	"strings"
 
 	"github.com/canzerapple/neonx-cli/location"
@@ -20,7 +21,17 @@ type GoVersion struct {
 }
 
 type Go struct {
-	root location.Location
+	Cmd
+}
+
+func findGoBin(root location.Location) location.Location {
+
+	if runtime.GOOS == "windows" {
+		return root.Child("bin/go.exe")
+	}
+
+	return root.Child("bin/go")
+
 }
 
 func LoadGoCommand() (*Go, error) {
@@ -37,27 +48,32 @@ func LoadGoCommand() (*Go, error) {
 		return nil, fmt.Errorf("invalid environ GOROOT ")
 	}
 
-	if cmd.root, err = location.ToLocation(root[0]); err != nil {
+	if cmd.bin, err = location.ToLocation(root[0]); err != nil {
 		return nil, fmt.Errorf("load go command fail: %s", err)
 	}
 
-	cmd.root = findGoBin(cmd.root)
+	cmd.bin = findGoBin(cmd.bin)
 
-	if exists, err = cmd.root.IsExists(); err != nil {
+	if exists, err = cmd.bin.IsExists(); err != nil {
 		return nil, err
 	}
 
 	if !exists {
-		return nil, fmt.Errorf("go command [%s] not found ", cmd.root)
+		return nil, fmt.Errorf("go command [%s] not found ", cmd.bin)
 	}
 
 	return cmd, nil
 }
 
-func (m *Go) GetVersion() (*GoVersion, error) {
+func (m *Go) GetGoVersion() (*GoVersion, error) {
+
+	cmd, err := LoadGoCommand()
+
+	if err != nil {
+		return nil, err
+	}
 
 	var (
-		cmd    = Command(m.root, "version")
 		writer = bytes.NewBuffer(nil)
 		v      = new(GoVersion)
 	)
@@ -65,7 +81,7 @@ func (m *Go) GetVersion() (*GoVersion, error) {
 	cmd.Stdout = writer
 	cmd.Stderr = writer
 
-	err := cmd.Run(context.Background())
+	err = cmd.Run(context.Background())
 
 	if err != nil {
 		return nil, err

@@ -5,6 +5,7 @@ import (
 	"os"
 	. "path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 
 	yaml "gopkg.in/yaml.v3"
@@ -18,6 +19,22 @@ var (
 
 //convert a path to location with abs path
 func ToLocation(root string) (location Location, err error) {
+
+	if runtime.GOOS == "darwin" {
+		if strings.HasPrefix(root, "~") {
+			home, exists := os.LookupEnv("HOME")
+
+			if !exists {
+				return emptyLocation, fmt.Errorf("convert [%s] to location fail: evn $HOME not exists", root)
+			}
+
+			if strings.Index(home, string(os.PathListSeparator)) > 0 {
+				return emptyLocation, fmt.Errorf("convert [%s] to location fail: evn $HOME format error", root)
+			}
+
+			return Location(Join(home, root[1:])), nil
+		}
+	}
 
 	root, err = Abs(root)
 

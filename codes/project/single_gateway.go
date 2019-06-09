@@ -1,7 +1,9 @@
-package codes
+package project
 
 import (
 	"fmt"
+
+	"github.com/canzerapple/neonx-cli/codes"
 
 	"github.com/canzerapple/neonx-cli/location"
 	. "github.com/canzerapple/neonx-cli/location/creator"
@@ -25,7 +27,11 @@ const (
 )
 
 type SGProject struct {
-	project
+	base
+}
+
+func (m *SGProject) ClassName() string {
+	return "SGProject"
 }
 
 func CreateSGProject(root location.Location, name, describe string) (*SGProject, error) {
@@ -38,9 +44,9 @@ func CreateSGProject(root location.Location, name, describe string) (*SGProject,
 				Dir(SGProjectServices),
 				Dir(SGProjectProtocol),
 				Dir(SGProjectMiddleware),
-				&ProjectInfo{
-					Type:      TypeProject,
-					Architect: ProjectSingleGateway,
+				&codes.ProjectInfo{
+					Type:      codes.TypeProject,
+					Architect: codes.ProjectSingleGateway,
 					Name:      name,
 					Describe:  describe,
 				},

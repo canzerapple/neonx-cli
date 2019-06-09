@@ -14,37 +14,52 @@ type NodeType int
 const (
 	NodeTypeDirectory = 0
 	NodeTypeFile      = 1
+	NodeTypeFiles     = 2
 )
 
 type Node interface {
-	GetName() string
 	GetNodeType() NodeType
 }
 
 type FileNode interface {
 	Node
+	GetName() string
 	SaveTo(writer io.Writer) error
 }
 
 type DirectoryNode interface {
 	Node
+	GetName() string
 	GetChild() Nodes
 }
 
+type FilesNode interface {
+	Node
+	GetNodes() Nodes
+}
+
 type Nodes []Node
+
+func (m Nodes) GetNodeType() NodeType {
+	return NodeTypeFiles
+}
+
+func (m Nodes) GetNodes() Nodes {
+	return m
+}
 
 func CreateNodes(location location.Location, root Node, overwrite bool) error {
 
 	switch node := root.(type) {
 	case DirectoryNode:
 
-		if err := location.CreateDirectory(root.GetName()); err != nil {
+		if err := location.CreateDirectory(node.GetName()); err != nil {
 			return err
 		}
 
 		var (
 			nodes = node.GetChild()
-			now   = location.Child(root.GetName())
+			now   = location.Child(node.GetName())
 		)
 
 		if nodes == nil {
@@ -58,7 +73,17 @@ func CreateNodes(location location.Location, root Node, overwrite bool) error {
 		}
 
 		return nil
+	case FilesNode:
+		for _, child := range node.GetNodes() {
 
+			err := CreateNodes(location, child, overwrite)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
 	case FileNode:
 
 		var (
